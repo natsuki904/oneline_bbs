@@ -1,18 +1,16 @@
 <?php
 
     //データベースに接続
-    $dsn = 'mysql:dbname=LAA0700008-onelinebbs;host;host=mysql107.phy.lolipop.lan';
-    $user = 'LAA0700008';
-    $password = 'seedkun007';
+    $dsn = 'mysql:dbname=oneline_bbs;host;host=localhost';
+    $user = 'root';
+    $password = '';
     $dbh = new PDO($dsn,$user,$password);
     $dbh->query('SET NAMES utf8'); 
 
-    //$_GET送信が行われた、編集処理を実行
-
-    $editname = '';
-    $editcomment = '';
+    $nickname = '';
+    $comment = '';
     $id = '';
-
+    //$_GET送信が行われた、編集処理を実行
     if(isset($_GET['action']) && $_GET['action'] == 'edit'){
       //編集したいデータを取得するSQL文を作成
       $sql = 'SELECT * FROM posts WHERE id ="'.$_GET['id'].'" ORDER BY created DESC';
@@ -26,6 +24,7 @@
       $id = $rec2['id'];
     }
 
+    //$_GET送信が行われた、削除処理を実行
     if(isset($_GET['action']) && $_GET['action'] == 'delite'){
       //削除したいデータを取得するSQL文を作成
       $id = $_GET['id'];
@@ -37,25 +36,27 @@
     }
 
 
-    //SQL文作成(INSERT文)
+    //POSTが入っていた場合、
     if(!empty($_POST) && isset($_POST)){
-
+      // empty ― 変数が空であるかどうかを検査する
+      // isset ― 変数がセットされていること、NULL でないことを検査する
       if(isset($_POST['update'])){
         //編集ボタンが押されたらアップデート
         $sql = 'UPDATE posts SET nickname="'.$_POST['nickname'].'",comment="'.$_POST['comment'].'",
         created=NOW() WHERE id='.$_POST['id'];
+
       } else {
         //通常のつぶやきボタンが押された時の処理
         $sql = 'INSERT INTO posts SET nickname="'.$_POST['nickname'].'",
         comment="'.$_POST['comment'].'",created=NOW()';
+      }
 
         //SQL文実行
         $stmt = $dbh->prepare($sql);
         $stmt->execute();
 
-        header('Location: bbs_moc.php');
+        header('Location: bbs_moc_2.php');
         exit();
-      }
     }
 
         //SQL文作成と実行（SELECT文）
@@ -70,8 +71,6 @@
             break;
           }
           $posts[] = $rec;
-           // $posts[] = $rec と $posts = $recのちがい 
-            // 
         } 
 
         //データベースから切断
@@ -131,7 +130,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-4 content-margin-top">
-        <form action="bbs_moc.php" method="post">
+        <form action="bbs_moc_2.php" method="post">
           <div class="form-group">
             <div class="input-group">
               <?php if(isset($_GET['action']) == 'edit'): ?>
@@ -161,9 +160,9 @@
 
               <?php if(isset($_GET['action']) == 'edit'): ?>
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
-                <button type="submit" name="insert" class="btn btn-primary col-xs-12" disabled>編集</button>
+                <button type="submit" name="update" class="btn btn-primary col-xs-12" disabled>編集</button>
               <?php else: ?>
-                  <button type="submit" name="update" class="btn btn-primary col-xs-12" disabled>つぶやく</button>
+                  <button type="submit" name="insert" class="btn btn-primary col-xs-12" disabled>つぶやく</button>
               <?php endif; ?>
 
         </form>
@@ -177,7 +176,7 @@
             <article class="timeline-entry">
 
                 <div class="timeline-entry-inner">
-                    <a href="bbs_moc.php?action=edit&id=<?php echo $post['id']; ?>">
+                    <a href="bbs_moc_2.php?action=edit&id=<?php echo $post['id']; ?>">
                       <div class="timeline-icon bg-success">
                           <i class="fa fa-cogs"></i>
                           <i class="entypo-feather"></i>
@@ -187,7 +186,7 @@
                     <div class="timeline-label">
                         <h2><a href="#"><?php echo $post['nickname']; ?></a><span><?php echo $post['created']; ?></span></h2>
                         <p><?php echo $post['comment']; ?></p>
-                        <a href="bbs_moc.php?action=delite&id=<?php echo $post['id']; ?>">
+                        <a href="bbs_moc_2.php?action=delite&id=<?php echo $post['id']; ?>">
                           <i class="fa fa-trash-o fa-lg"></i>                          
                         </a>
                     </div>
